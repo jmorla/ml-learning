@@ -13,12 +13,22 @@ public class MatrixMultiplication {
                 // 3 x 4
         };
 
-        var parameters = MatrixOperations.transpose(new double[][] {
+        var parameters = new double[][] {
                 { 0.219, 1, 0.65, 0.2 },
-        });
+        };
         // 4 x 1
 
-        var result = MatrixOperations.multiply(features, parameters);
-        System.out.println(Arrays.deepToString(result));
+        // using utility class
+        var parametersT = MatrixOperations.transpose(parameters);
+        var result = MatrixOperations.multiply(features, parametersT);
+        System.out.println("classic=" + Arrays.deepToString(result));
+
+
+        // using Matrix
+        var featuresMatrix = new Matrix(features);
+        var paramMatrix = new Matrix(parameters);
+
+        featuresMatrix.multiply(paramMatrix.transpose());
+        System.out.println("new=" + Arrays.deepToString(result));
     }
 }
