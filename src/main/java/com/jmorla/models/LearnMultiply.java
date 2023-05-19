@@ -4,27 +4,48 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jmorla.CostFunctions;
 import com.jmorla.DatasetUtils;
 import com.jmorla.Matrix;
 
 public class LearnMultiply {
 
-    public static void main(String[] args) throws JsonProcessingException {
-        var params = new Matrix(new double[][] { { 2, 0 } }).transpose();
-        var dataset = new Matrix(DatasetUtils.doubleSquareDataset(10, 0.1, 1));
+    public static void main(String[] args) {
 
-        var expectations = dataset.multiply(new Matrix(new double[][] { { 0, 1 } }).transpose());
+        var trainingDataset = new Matrix(DatasetUtils.doubleSquareDataset(10, 0, 1));
 
-        var predictions = dataset.multiply(params);
+        // anulates x's column multiplying it by 0
+        var squares = trainingDataset.multiply(new Matrix(new double[][] { { 0, 1 } }).transpose());
+        // anulates square's column multiplying it by 0
+        var design = trainingDataset.multiply(new Matrix(new double[][] { { 1, 0 } }).transpose());
 
-        var mse = CostFunctions.mse(predictions.toArray(), expectations.toArray());
+        // calculating optimal parameter using normal equation
+        // P = (Xt * X)^-1 * Xt * Y
+        var params = design.transpose()
+                .multiply(design)
+                .inverse()
+                .multiply(design.transpose())
+                .multiply(squares);
 
-        var response = Map.of(
-                "mse", mse,
+        var testingDataset = new Matrix(DatasetUtils.doubleSquareDataset(5, 0, 5));
+        var testInputs = testingDataset.multiply(new Matrix(new double[][] { { 1 }, { 0 } }));
+
+        // predict the squares
+        var predictions = testInputs.multiply(params);
+
+        printAsJson(Map.of(
+                "dataset", testingDataset.toArray(),
                 "predictions", predictions.toArray(),
-                "dataset", dataset.toArray());
+                "param", params.toArray()));
 
-        System.out.println(new ObjectMapper().writeValueAsString(response));
+    }
+
+    private static void printAsJson(Map<String, Object> map) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            var str = mapper.writeValueAsString(map);
+            System.out.println(str);
+        } catch (JsonProcessingException ex) {
+            System.err.println(ex.getMessage());
+        }
     }
 }
