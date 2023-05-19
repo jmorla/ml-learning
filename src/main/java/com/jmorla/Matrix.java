@@ -3,10 +3,14 @@ package com.jmorla;
 import java.util.Arrays;
 
 public final class Matrix {
-    double[][] matrix;
+    private double[][] matrix;
 
     public Matrix(double[][] matrix) {
         this.matrix = matrix;
+    }
+
+    public int[] shape() {
+        return new int[] { matrix.length, matrix.length > 0 ? matrix[0].length : 0 };
     }
 
     public Matrix transpose() {
